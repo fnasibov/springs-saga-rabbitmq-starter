@@ -7,5 +7,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class SagaProperties {
     val topicExchangeName = "saga_exchange"
     val queueName = "saga"
-
 }

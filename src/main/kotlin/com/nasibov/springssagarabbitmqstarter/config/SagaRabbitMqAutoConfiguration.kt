@@ -27,12 +27,6 @@ class SagaRabbitMqAutoConfiguration(private val sagaProperties: SagaProperties) 
         return RabbitAdmin(rabbitTemplate)
     }
 
-    @Bean("sagaQueue")
-    fun queue(): Queue {
-
-        return Queue(sagaProperties.queueName, false)
-    }
-
     @Bean("sagaExchange")
     fun exchange(): TopicExchange {
 

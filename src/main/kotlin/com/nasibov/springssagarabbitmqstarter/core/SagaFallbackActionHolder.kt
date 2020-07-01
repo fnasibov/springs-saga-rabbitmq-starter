@@ -1,6 +1,7 @@
 package com.nasibov.springssagarabbitmqstarter.core
 
+import org.springframework.amqp.core.Message
+
 object SagaFallbackActionHolder {
-    val bodyClassByFallbackRoutingKey: Map<String, Class<Any>> = mutableMapOf()
-    val fallbackActionsByBodyClass: Map<Class<Any>, (Any) -> Unit> = mutableMapOf()
+    val fallbackActionsByFallbackRoutingKey: MutableMap<String, (Message) -> Unit> = mutableMapOf()
 }

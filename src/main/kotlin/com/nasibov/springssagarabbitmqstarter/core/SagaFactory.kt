@@ -1,24 +1,34 @@
 package com.nasibov.springssagarabbitmqstarter.core
 
-import org.springframework.amqp.core.*
+import com.nasibov.springssagarabbitmqstarter.config.SagaProperties
+import org.springframework.amqp.core.AmqpAdmin
+import org.springframework.amqp.core.BindingBuilder
+import org.springframework.amqp.core.Queue
+import org.springframework.amqp.core.TopicExchange
 import org.springframework.amqp.rabbit.core.RabbitTemplate
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
+import kotlin.random.Random
 
+@Component
 class SagaFactory(
-        private val queue: Queue,
+        private val sagaProperties: SagaProperties,
         private val amqpAdmin: AmqpAdmin,
         private val rabbitTemplate: RabbitTemplate,
         private val exchange: TopicExchange
 ) {
+    @Value("\${spring.application.name}")
+    private val appName: String? = null
 
-    fun <BODY_CLASS> create(
-            actionRoutingKey: String,
+    fun <BODY_CLASS: Any> create(
+            baseRoutingKey: String,
             body: BODY_CLASS,
             fallbackAction: (BODY_CLASS) -> Unit
     ): Saga<BODY_CLASS> {
-        val fallbackRoutingKey = "$actionRoutingKey.cancele"
-        amqpAdmin.declareBinding(BindingBuilder.bind(queue).to(exchange).with(actionRoutingKey))
-        amqpAdmin.declareBinding(BindingBuilder.bind(queue).to(exchange).with(fallbackRoutingKey))
-        return Saga(rabbitTemplate,queue,exchange, actionRoutingKey, fallbackRoutingKey, body, fallbackAction)
+        val queue = Queue(sagaProperties.queueName + "_" + appName, true)
+        amqpAdmin.declareQueue(queue)
+        amqpAdmin.declareBinding(BindingBuilder.bind(queue).to(exchange).with(baseRoutingKey))
+        return Saga(rabbitTemplate, queue, exchange, "$baseRoutingKey.action", "$baseRoutingKey.canceled", body, fallbackAction)
     }
 
 }

@@ -4,7 +4,8 @@ import org.springframework.amqp.core.Queue
 import org.springframework.amqp.core.TopicExchange
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 
-class Saga<BODY_CLASS>(
+@Suppress("UNCHECKED_CAST")
+class Saga<BODY_CLASS: Any>(
         private val rabbitTemplate: RabbitTemplate,
         queue: Queue,
         private val exchange: TopicExchange,
@@ -14,16 +15,13 @@ class Saga<BODY_CLASS>(
         private val fallbackAction: (BODY_CLASS) -> Unit
 ) {
 
-    init {
-        val message = rabbitTemplate.receive(queue.name)
-        val receivedRoutingKey = message?.messageProperties?.receivedRoutingKey
-        if (receivedRoutingKey == fallbackRoutingKey) {
-            @Suppress("UNCHECKED_CAST")
-            fallbackAction.invoke((rabbitTemplate.messageConverter.fromMessage(message) as BODY_CLASS))
-        }
-    }
+   init {
+       SagaFallbackActionHolder.fallbackActionsByFallbackRoutingKey[fallbackRoutingKey] = {
+           val fallbackBody = rabbitTemplate.messageConverter.fromMessage(it) as BODY_CLASS
+           fallbackAction.invoke(fallbackBody)
+       }
+   }
     fun start() {
-        rabbitTemplate.convertAndSend(exchange.name, actionRoutingKey)
+        rabbitTemplate.convertAndSend(actionRoutingKey, body)
     }
-
 }
