@@ -8,7 +8,6 @@ import org.springframework.amqp.core.TopicExchange
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import kotlin.random.Random
 
 @Component
 class SagaFactory(
@@ -28,7 +27,7 @@ class SagaFactory(
         val queue = Queue(sagaProperties.queueName + "_" + appName, true)
         amqpAdmin.declareQueue(queue)
         amqpAdmin.declareBinding(BindingBuilder.bind(queue).to(exchange).with(baseRoutingKey))
-        return Saga(rabbitTemplate, queue, exchange, "$baseRoutingKey.action", "$baseRoutingKey.canceled", body, fallbackAction)
+        return Saga(rabbitTemplate, "$baseRoutingKey.action", "$baseRoutingKey.canceled", body, fallbackAction)
     }
 
 }

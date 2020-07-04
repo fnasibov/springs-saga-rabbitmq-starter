@@ -40,7 +40,7 @@ class SagaRabbitMqAutoConfiguration(private val sagaProperties: SagaProperties) 
             rabbitTemplate: RabbitTemplate,
             @Qualifier("sagaExchange") exchange: TopicExchange
     ): SagaFactory {
-        return SagaFactory(queue, amqpAdmin, rabbitTemplate, exchange)
+        return SagaFactory(sagaProperties, amqpAdmin, rabbitTemplate, exchange)
     }
 
 }

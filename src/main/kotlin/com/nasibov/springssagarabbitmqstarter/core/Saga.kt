@@ -7,8 +7,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate
 @Suppress("UNCHECKED_CAST")
 class Saga<BODY_CLASS: Any>(
         private val rabbitTemplate: RabbitTemplate,
-        queue: Queue,
-        private val exchange: TopicExchange,
         private val actionRoutingKey: String,
         fallbackRoutingKey: String,
         private val body: BODY_CLASS,
